@@ -83,4 +83,51 @@ Ces différents messages donnent les indications suivantes en fonction de l’ab
 - Groupe horaire si option = heures creuses ou tempo : HHPHC (1 car.)
 - Mot d’état (autocontrôle) : MOTDETAT (6 car.)
 
+------------------------------------------------------------------------------------------------------------------------
 
+Teleinfo Universal Library
+This is a fork of Teleinfo Universal Library for the ESP8266 MCU
+This is a generic Teleinfo French Meter Measure Library
+
+Initial Github source : https://github.com/hallard/LibTeleinfo
+Modified Github source : https://github.com/Doume/LibTeleinfo
+
+
+
+------------------------------------------------------------------------------------------------------------------------
+Modified Github source :https://github.com/marco402/LibTeleinfo
+------------------------------------------------------------------------------------------------------------------------
+
+Reorganization of the WifInfo example linked to the teleinfo library.
+
+I undertook this work in order to use this software for various applications with or without a teleinfo link.
+
+In a first phase I tried to keep the original features of WifInfo version with syslog.
+
+However, I added (in parenthesis the compilation options):
+
+-Time setting by NTP(AVEC_NTP).
+-The teleinfo frame simulation, historic version (SIMUTRAMETEMPO).
+-The possibility to receive the teleinfo on RXD0(TELEINFO_RXD2).
+
+-I have not retested:
+	-The leds outputs(leds.cpp and leds.h),I kept the original functions but I have another version with leds APA106.
+	-The emoncms,jeedom and httpRequest outputs, functions that are original to the implementation of the classes.
+
+------------------------------------------------------------------------------------------------------------------------
+
+Réorganisation de l'exemple WifInfo lié à la bibliothèque teleinfo.
+
+J'ai entrepris ce travail afin d'utiliser ce logiciel pour divers applications avec ou sans liaison teleinfo.
+
+Dans une première phase j'ai essayé de conserver les fonctions d'origine de WifInfo version avec syslog.
+
+Cependant, j’ai ajouté(entre parenthèse les options de compilation):
+	-La mise à l'heure par NTP(AVEC_NTP).
+	-La simulation de trame teleinfo version historique(SIMUTRAMETEMPO).
+	-La possibilitée de recevoir la teleinfo sur RXD0(TELEINFO_RXD2).
+	
+-Je n'ai pas retesté:
+	-Les sorties leds(leds.cpp et leds.h),j'ai conservé les fonctions d'origine mais j'ai une autre version avec des leds APA106.
+	-Les sortie emoncms,jeedom et httpRequest, fonctions qui sont d'origine à la mise en place des classes près.
+	

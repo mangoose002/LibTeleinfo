@@ -18,8 +18,19 @@
 //
 // All text above must be included in any redistribution.
 //
+// Modifié par marc Prieur 2019
+//		-intégré le code dans la classe webClient webClient.cpp  webClient.h
+//
+// Using library ESP8266HTTPClient version 1.1
+//
 // **********************************************************************************
-
+#include <Arduino.h>
+#include <ESP8266HTTPClient.h>
+#include "Wifinfo.h"
+#include "mySyslog.h"
+#include "LibTeleinfo.h"
+#include "config.h"
+#include "myNTP.h"
 #include "webclient.h"
 
 /* ======================================================================
@@ -31,7 +42,7 @@ Input   : hostname
 Output  : true if received 200 OK
 Comments: -
 ====================================================================== */
-boolean httpPost(char * host, uint16_t port, char * url)
+boolean webClient::httpPost(char * host, uint16_t port, char * url)
 {
   HTTPClient http;
   bool ret = false;
@@ -42,16 +53,15 @@ boolean httpPost(char * host, uint16_t port, char * url)
   http.begin(host, port, url); 
   //http.begin("http://emoncms.org/input/post.json?node=20&apikey=2f13e4608d411d20354485f72747de7b&json={PAPP:100}");
   //http.begin("emoncms.org", 80, "/input/post.json?node=20&apikey=2f13e4608d411d20354485f72747de7b&json={}"); //HTTP
-
-  sprintf(buff,"http%s://%s:%d%s => ", port==443?"s":"", host, port, url);
-  Debug(buff);
+  char  buffer[132];
+  sprintf(buffer,"http%s://%s:%d%s => ", port==443?"s":"", host, port, url);
+  Debug(buffer);
 
   // start connection and send HTTP header
   int httpCode = http.GET();
   if(httpCode) {
       // HTTP header has been send and Server response header has been handled
-      Debug(httpCode);
-      Debug(" ");
+      Debug(httpCode); DebugF(" ");
       // file found at server
       if(httpCode == 200) {
         String payload = http.getString();
@@ -61,8 +71,8 @@ boolean httpPost(char * host, uint16_t port, char * url)
   } else {
       DebugF("failed!");
   }
-  sprintf(buff," in %d ms\r\n",millis()-start);
-  Debug(buff);
+  sprintf(buffer," in %ld ms\r\n",millis()-start);
+  Debug(buffer);
   return ret;
 }
 /* ======================================================================
@@ -72,13 +82,13 @@ Input   : -
 Output  : String if some Teleinfo data available
 Comments: -
 ====================================================================== */
-String build_emoncms_json(void)
+String webClient::build_emoncms_json(void)
 {
   boolean first_item = true;
   
   String url = "{" ;
 
-  ValueList * me = tinfo.getList();
+  ValueList * me = TINFO.getList();
 
   if (me) {
       // Loop thru the node
@@ -159,7 +169,8 @@ String build_emoncms_json(void)
             } else {
               //Value name not valid : ignore this value, and
               //  force Teleinfo to reinit on next loop !
-              need_reinit=true;
+				Debugln("setReinit emoncms");
+				TINFO.setReinit();
             }
          } //not free entry
       } // While next
@@ -178,28 +189,28 @@ Input   :
 Output  : true if post returned 200 OK
 Comments: -
 ====================================================================== */
-boolean emoncmsPost(void)
+boolean webClient::emoncmsPost(void)
 {
   boolean ret = false;
 
   // Some basic checking
-  if (*config.emoncms.host) {
-    ValueList * me = tinfo.getList();
+  if (*CONFIGURATION.config.emoncms.host) {
+    ValueList * me = TINFO.getList();
     // Got at least one ?
     if (me && me->next) {
       String url ; 
       
 
-      url = *config.emoncms.url ? config.emoncms.url : "/";
+      url = *CONFIGURATION.config.emoncms.url ? CONFIGURATION.config.emoncms.url : "/";
       url += "?";
-      if (config.emoncms.node>0) {
+      if (CONFIGURATION.config.emoncms.node>0) {
         url+= F("node=");
-        url+= String(config.emoncms.node);
+        url+= String(CONFIGURATION.config.emoncms.node);
         url+= "&";
       } 
 
       url += F("apikey=") ;
-      url += config.emoncms.apikey;
+      url += CONFIGURATION.config.emoncms.apikey;
 
       //append json list of values
       url += F("&json=") ;
@@ -207,7 +218,7 @@ boolean emoncmsPost(void)
       url += build_emoncms_json();  //Get Teleinfo list of values
 
       // And submit all to emoncms
-      ret = httpPost( config.emoncms.host, config.emoncms.port, (char *) url.c_str()) ;
+      ret = httpPost(CONFIGURATION.config.emoncms.host, CONFIGURATION.config.emoncms.port, (char *) url.c_str()) ;
 
     } // if me
   } // if host
@@ -221,30 +232,30 @@ Input   :
 Output  : true if post returned 200 OK
 Comments: -
 ====================================================================== */
-boolean jeedomPost(void)
+boolean webClient::jeedomPost(void)
 {
   boolean ret = false;
 
   // Some basic checking
-  if (*config.jeedom.host) {
-    ValueList * me = tinfo.getList();
+  if (*CONFIGURATION.config.jeedom.host) {
+    ValueList * me = TINFO.getList();
     // Got at least one ?
     if (me && me->next) {
       String url ; 
       boolean skip_item;
 
-      url = *config.jeedom.url ? config.jeedom.url : "/";
+      url = *CONFIGURATION.config.jeedom.url ? CONFIGURATION.config.jeedom.url : "/";
       url += "?";
 
       // Config identifiant forcée ?
-      if (*config.jeedom.adco) {
+      if (*CONFIGURATION.config.jeedom.adco) {
         url+= F("ADCO=");
-        url+= config.jeedom.adco;
+        url+= CONFIGURATION.config.jeedom.adco;
         url+= "&";
       } 
 
       url += F("api=") ;
-      url += config.jeedom.apikey;
+      url += CONFIGURATION.config.jeedom.apikey;
       url += F("&") ;
 
       // Loop thru the node
@@ -255,7 +266,7 @@ boolean jeedomPost(void)
 
         // Si ADCO déjà renseigné, on le remet pas
         if (!strcmp(me->name, "ADCO")) {
-          if (*config.jeedom.adco)
+          if (*CONFIGURATION.config.jeedom.adco)
             skip_item = true;
         }
 
@@ -272,7 +283,7 @@ boolean jeedomPost(void)
         }
       } // While me
 
-      ret = httpPost( config.jeedom.host, config.jeedom.port, (char *) url.c_str()) ;
+      ret = httpPost(CONFIGURATION.config.jeedom.host, CONFIGURATION.config.jeedom.port, (char *) url.c_str()) ;
     } // if me
   } // if host
   return ret;
@@ -285,21 +296,21 @@ Input   :
 Output  : true if post returned 200 OK
 Comments: -
 ====================================================================== */
-boolean httpRequest(void)
+boolean webClient::httpRequest(void)
 {
   boolean ret = false;
 
   // Some basic checking
-  if (*config.httpReq.host)
+  if (*CONFIGURATION.config.httpReq.host)
   {
-    ValueList * me = tinfo.getList();
+    ValueList * me = TINFO.getList();
     // Got at least one ?
     if (me && me->next)
     {
       String url ; 
       boolean skip_item;
 
-      url = *config.httpReq.path ? config.httpReq.path : "/";
+      url = *CONFIGURATION.config.httpReq.path ? CONFIGURATION.config.httpReq.path : "/";
       url += "?";
 
       // Loop thru the node
@@ -367,45 +378,63 @@ boolean httpRequest(void)
 	      }
       } // While me
 
-      ret = httpPost( config.httpReq.host, config.httpReq.port, (char *) url.c_str()) ;
+      ret = httpPost(CONFIGURATION.config.httpReq.host, CONFIGURATION.config.httpReq.port, (char *) url.c_str()) ;
     } // if me
   } // if host
   return ret;
 }
-
 #ifdef SENSOR
 /* ======================================================================
 Function: UPD_switch
 Purpose : Do a http request to update Switch state into Domoticz
-Input   : 
+Input   :
 Output  : true if post returned 200 OK
 Comments: -
 ====================================================================== */
 boolean UPD_switch(void)
 {
-  boolean ret = false;
+	boolean ret = false;
 
-  // Some basic checking
-  if (*config.httpReq.host && (config.httpReq.swidx != 0) )
-  {
-      char url[128]; 
-      char State[5];
-      uint16_t port = config.httpReq.port;
+	// Some basic checking
+	if (*config.httpReq.host && (config.httpReq.swidx != 0))
+	{
+		char url[128];
+		char State[5];
+		uint16_t port = config.httpReq.port;
 
-      if(port == 0)
-        port = 80;
+		if (port == 0)
+			port = 80;
 
-      if(SwitchState)
-        sprintf(State,"Off");  //switch ouvert
-      else
-        sprintf(State,"On");   //switch fermé : portail fermé 
+		if (SwitchState)
+			sprintf(State, "Off");  //switch ouvert
+		else
+			sprintf(State, "On");   //switch fermé : portail fermé 
 
-      sprintf(url,"/json.htm?type=command&param=switchlight&idx=%d&switchcmd=%s",(int)config.httpReq.swidx, State);
-      //Debugf("Updating switch: <%s>\n",  url );
-      ret = httpPost( config.httpReq.host, port, url) ;
-   
-  } // if host & idx
-  return ret;
+		sprintf(url, "/json.htm?type=command&param=switchlight&idx=%d&switchcmd=%s", (int)config.httpReq.swidx, State);
+		//Debugf("Updating switch: <%s>\n",  url );
+		ret = httpPost(config.httpReq.host, port, url);
+
+	} // if host & idx
+	return ret;
 }
 #endif
+/* ======================================================================
+Function: validate_value_name
+Purpose : check if value name is in known range of values....
+Input   : name to check
+Output  : true if OK, false otherwise
+Comments: -
+====================================================================== */
+bool webClient::validate_value_name(String name)
+{
+
+	for (int i = 0; i < 35; i++) {
+		if ((tabnames[i].length() == name.length()) && (tabnames[i] == name)) {
+			return true;
+		}
+	}
+	return false; //Not an existing name !
+}
+
+
 

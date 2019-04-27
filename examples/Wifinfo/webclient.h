@@ -1,12 +1,12 @@
 // **********************************************************************************
-// ESP8266 Teleinfo WEB Client routing Include file
+// ESP8266 Teleinfo WEB Client, routine include file
 // **********************************************************************************
 // Creative Commons Attrib Share-Alike License
 // You are free to use/extend this library but please abide with the CC-BY-SA license:
 // Attribution-NonCommercial-ShareAlike 4.0 International License
 // http://creativecommons.org/licenses/by-nc-sa/4.0/
 //
-// For any explanation about teleinfo ou use , see my blog
+// For any explanation about teleinfo ou use, see my blog
 // http://hallard.me/category/tinfo
 //
 // This program works with the Wifinfo board
@@ -18,30 +18,44 @@
 //
 // All text above must be included in any redistribution.
 //
+// Modifié par marc Prieur 2019
+//		-intégré le code dans la classe webClient webClient.cpp  webClient.h
+//
+// Using library ESP8266HTTPClient version 1.1
+//
 // **********************************************************************************
 
 #ifndef WEBCLIENT_H
 #define WEBCLIENT_H
 
-// Include main project include file
+#include <Arduino.h> 
 #include "Wifinfo.h"
 
-// Exported variables/object instancied in main sketch
-// ===================================================
-extern bool          need_reinit;
-extern char          buff[];
 
-// Exported function instancied in webserver.cpp
-// =============================================
-extern bool          validate_value_name(String name);
+class webClient
+{
+public:
 
-// declared exported function from webclient.cpp
-// ===================================================
-boolean httpPost(char * host, uint16_t port, char * url);
-boolean emoncmsPost(void);
-boolean jeedomPost(void);
-boolean httpRequest(void);
-boolean UPD_switch(void);
-String  build_emoncms_json(void);
+	boolean emoncmsPost(void);
+	boolean jeedomPost(void);
+	boolean httpRequest(void);
+	//boolean UPD_switch(void);
+	String  build_emoncms_json(void);
+	bool validate_value_name(String name);
 
+	
+private:
+	boolean httpPost(char * host, uint16_t port, char * url);
+	//List of authorized value names in Teleinfo, to detect polluted entries
+		const String tabnames[35] = {
+	  "ADCO" , "OPTARIF" , "ISOUSC" , "BASE", "HCHC" , "HCHP",
+	   "IMAX" , "IINST" , "PTEC", "PMAX", "PAPP", "HHPHC" , "MOTDETAT" , "PPOT",
+	   "IINST1" , "IINST2" , "IINST3", "IMAX1" , "IMAX2" , "IMAX3" ,
+	  "EJPHN" , "EJPHPM" , "BBRHCJB" , "BBRHPJB", "BBRHCJW" , "BBRHPJW" , "BBRHCJR" ,
+	  "BBRHPJR" , "PEJP" , "DEMAIN" , "ADPS" , "ADIR1", "ADIR2" , "ADIR3"
+	};
+
+
+};
+extern webClient WEBCLIENT;
 #endif

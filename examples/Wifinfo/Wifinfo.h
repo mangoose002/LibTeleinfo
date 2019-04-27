@@ -18,34 +18,21 @@
 //
 // All text above must be included in any redistribution.
 //
+//
+//Using library Ticker version 1.0
+//
+// Modifié par marc Prieur 04/2019
+//
 // **********************************************************************************
 #ifndef WIFINFO_H
 #define WIFINFO_H
 
-// Include Arduino header
-#include <Arduino.h>
-#include <ESP8266WiFi.h>
-#include <ESP8266WebServer.h>
-#include <ESP8266HTTPClient.h>
-#include <ESP8266mDNS.h>
-#include <WiFiUdp.h>
-#include <Syslog.h>
-#include <EEPROM.h>
 #include <Ticker.h>
-//#include <WebSocketsServer.h>
-//#include <Hash.h>
-#include <NeoPixelBus.h>
-#include <LibTeleinfo.h>
-#include <FS.h>
-
+#include <ESP8266WiFi.h>
 extern "C" {
 #include "user_interface.h"
 }
-
-#include "webserver.h"
-#include "webclient.h"
-#include "config.h"
-
+ 
 // Décommenter SIMU pour compiler une version de test
 //  pour un module non connecté au compteur EDF (simule un ADCO et une valeur HCHC)
 // Le port Serial sera alors utilisé pour le DEBUG (accessible via USB pour l'IDE)
@@ -59,143 +46,50 @@ extern "C" {
 
 // Décommenter SYSLOG pour une version capable d'envoyer du Debug
 //  vers un serveur rsyslog du réseau
-#define SYSLOG
+#define SYSLOG			//messages syslog(sous windows-->visual syslog server)
+//parametrer le port et l'adresse ip du serveur sur la page web
+//avec visual syslog sous windows,paramétrer le parefeu
 
 //Décommenter SENSOR pour compiler une  version capable de gérer
 //  un contact sec connecté entre Ground et D5 (GPIO-14)
-#define SENSOR
+#define NO_SENSOR			//pas remis SENSOR dans wifinfo.ino, il faudrait générer une classe sensor. marc
 
-// En mode SIMU, cela signifie que rien n'est connecté au port Serial
-// On peut donc laisser le debug sur ce port, pour beneficier de
-// l'affichage via Arduino IDE
-#ifdef DEBUG
-#define MACRO
+/*  ===========================defines=================================== */
+#define TELEINFO_RXD2			//teleinfo sur RXD2 sinon sur RXD0
+#define DEBUGSERIAL				//DEBUGSERIAL debug vers TXD0
+#define SIMUTRAMETEMPO		//Version standard:simulation des trames tempo. strapper D4(TXD1) et D7(RXD2) ou D9(RXD0) suivant TELEINFO_RXD2
+#define AVEC_NTP				//Serveur de temps
+#define NO_IPSTATIC				//Essayer adresse hors plage DHCP(voir box) ---->OK mais plus de liaison avec l'extérieur(NTP...)il faudrait du  routage au niveau de la box!
+#define MODE_HISTORIQUE			//Pour le linky sinon mode standard (mode standard incomplet)
 
-#ifdef SIMU
-#define DEBUG_SERIAL	Serial
+#ifdef DEBUGSERIAL
+	#define MACRO
+	#define DEBUG_SERIAL  Serial
 #else
-#define DEBUG_SERIAL	Serial1
-#define DEBUG_SERIAL1
-#endif  //SIMU
+	#define DEBUG_SERIAL  Serial1
+#endif 
 
-#else
-// DEBUG not set
-
-#ifdef SIMU
-#define DEBUG_SERIAL  Serial
-#else
-#define DEBUG_SERIAL  Serial1
-#define DEBUG_SERIAL1
-#endif  //SIMU
-
-#endif  //DEBUG
-
-#define WIFINFO_VERSION "1.0.6"
+#define WIFINFO_VERSION "2.0.0"
 
 #ifdef SYSLOG
-#define MACRO
-// Definit le client syslog
-#define APP_NAME "Wifinfo"
+	#define MACRO
+	// Definit le client syslog
+	#define APP_NAME "Wifinfo"
 #endif
 
-// voir : https://github.com/arduino/Arduino/tree/master/hardware/arduino/avr/cores/arduino
-// le Serial.print sous toutes ses formes....
+#define WIFIOK ((WiFi.status() == WL_CONNECTED) && (wifi_station_get_connect_status() == STATION_GOT_IP))
+#define WIFINOOKET ((WiFi.status() != WL_CONNECTED) && (wifi_station_get_connect_status() != STATION_GOT_IP))
+#define WIFINOOKOU ((WiFi.status() != WL_CONNECTED) || (wifi_station_get_connect_status() != STATION_GOT_IP))
 
-// I prefix debug macro to be sure to use specific for THIS library
-// debugging, this should not interfere with main sketch or other 
-// libraries
-#ifdef MACRO
-#define Debug(x)    Myprint(x)
-#define Debugln(x)  Myprintln(x)
-#define DebugF(x)   Myprint(F(x))
-#define DebuglnF(x) Myprintln(F(x))
-#define Debugflush()  Myflush()
-#else
-#define Debug(x)    {}
-#define Debugln(x)  {}
-#define DebugF(x)   {}
-#define DebuglnF(x) {}
-#define Debugf(...) {}
-#define Debugflush()  {}
-#endif
+enum ETAT_JOUR { ETAT_JOUR_BLEU = 0, ETAT_JOUR_BLANC, ETAT_JOUR_ROUGE, ETAT_JOUR_INIT, ETAT_JOUR_PRESENT = 0, ETAT_JOUR_ABSENT = 16, ETAT_JOUR_JOUR = 0, ETAT_JOUR_NUIT = 3, ETAT_JOUR_INCONNU = 10 };
 
-#define BLINK_LED_MS   50 // 50 ms blink
-#define RGB_LED_PIN    14 
-#define RED_LED_PIN    12
-
-// value for HSL color
-// see http://www.workwithcolor.com/blue-color-hue-range-01.htm
-#define COLOR_RED             0
-#define COLOR_ORANGE         30
-#define COLOR_ORANGE_YELLOW  45
-#define COLOR_YELLOW         60
-#define COLOR_YELLOW_GREEN   90
-#define COLOR_GREEN         120
-#define COLOR_GREEN_CYAN    165
-#define COLOR_CYAN          180
-#define COLOR_CYAN_BLUE     210
-#define COLOR_BLUE          240
-#define COLOR_BLUE_MAGENTA  275
-#define COLOR_MAGENTA	      300
-#define COLOR_PINK		      350
-
-// GPIO 1 TX on board blue led
-#ifdef BLU_LED_PIN
-#define LedBluON()  {digitalWrite(BLU_LED_PIN, 0);}
-#define LedBluOFF() {digitalWrite(BLU_LED_PIN, 1);}
-#else
-#define LedBluON()  {}
-#define LedBluOFF() {}
-#endif
-// GPIO 12 red led
-#define LedRedON()  {digitalWrite(RED_LED_PIN, 1);}
-#define LedRedOFF() {digitalWrite(RED_LED_PIN, 0);}
-
-// Light off the RGB LED
-#ifndef RGB_LED_PIN
-#define LedRGBOFF() {}
-#define LedRGBON(x) {}
-#endif
-// sysinfo informations
-typedef struct 
-{
-  String sys_uptime;
-} _sysinfo;
-
-// Exported variables/object instancied in main sketch
-// ===================================================
-extern ESP8266WebServer server;
-extern WiFiUDP OTA;
-extern TInfo tinfo;
-extern uint8_t rgb_brightness;
-extern unsigned long seconds;
-extern _sysinfo sysinfo;
 extern Ticker Tick_emoncms;
 extern Ticker Tick_jeedom;
 extern Ticker Tick_httpRequest;
 
-
-
 // Exported function located in main sketch
-// ===================================================
-void ResetConfig(void);
 void Task_emoncms();
 void Task_jeedom();
 void Task_httpRequest();
 
-#ifdef MACRO
-void Myprint(void);
-void Myprint(unsigned char *msg);
-void Myprint(String msg);
-void Myprint(const __FlashStringHelper *msg);
-void Myprint(unsigned int i);
-void Myprintln(void);
-void Myprintln(unsigned char *msg);
-void Myprintln(String msg);
-void Myprintln(const __FlashStringHelper *msg);
-void Myprintln(unsigned int i);
-void Myflush(void);
-#endif    //MACRO
-
 #endif
-

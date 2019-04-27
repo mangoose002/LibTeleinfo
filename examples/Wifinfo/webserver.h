@@ -18,51 +18,55 @@
 //
 // All text above must be included in any redistribution.
 //
+// Modifié par marc Prieur 2019
+//		-intégré le code dans la classe webClient webServer.cpp  webServer.h
+//
+// Using library ESP8266WebServer version 1.0
+//
 // **********************************************************************************
 
-#ifndef WEBSERVER_H
-#define WEBSERVER_H
-
-// Include main project include file
+#ifndef __WEBSERVER_H__
+#define __WEBSERVER_H__
+#include <Arduino.h> 
 #include "Wifinfo.h"
 
 // Web response max size
 #define RESPONSE_BUFFER_SIZE 4096
 
-// Exported variables/object instancied in main sketch
-// ===================================================
-extern char         response[];
-extern uint16_t     response_idx;
-extern int          nb_reconnect;
-extern unsigned int nb_reinit;
-extern bool		      need_reinit;
-extern bool         first_info_call;
-extern int          SwitchState;
-extern char         buff[];
-extern char         optval[];
+const char FP_JSON_START[] PROGMEM = "{\r\n";
+const char FP_JSON_END[] PROGMEM = "\r\n}\r\n";
+const char FP_QCQ[] PROGMEM = "\":\"";
+const char FP_QCNL[] PROGMEM = "\",\r\n\"";
+const char FP_RESTART[] PROGMEM = "OK, Redémarrage en cours\r\n";
+const char FP_NL[] PROGMEM = "\r\n";
 
-// Exported function instancied in webclient.cpp
-// =============================================
-extern String build_emoncms_json(void);
+class webServer : public ESP8266WebServer
+{
+public:
+	webServer();
+	void initSpiffs(void);
+	void initServeur(void);
+	void incNb_reinit(void);
+private:
+	bool handleFileRead(String path);
 
-// declared exported function from webserver.cpp
-// ===================================================
-void handleTest(void);
-void handleRoot(void); 
-void handleFormConfig(void) ;
-void handleNotFound(void);
-void tinfoJSONTable(void);
-void getSysJSONData(String & r);
-void sysJSONTable(void);
-void emoncmsJSONTable(void);    //Added by Doume
-void getConfJSONData(String & r);
-void confJSONTable(void);
-void getSpiffsJSONData(String & r);
-void spiffsJSONTable(void);
-void sendJSON(void);
-void wifiScanJSON(void);
-void handleFactoryReset(void);
-void handleReset(void);
-bool validate_value_name(String name);
+	void getSysJSONData(String & r);
+	void getConfJSONData(String & r);
+	void getSpiffsJSONData(String & r);
+	void initOptVal(void);
+	String getContentType(String filename);
+	void formatNumberJSON(String &response, char * value);
+	char optval[128];
+	String formatSize(size_t bytes);
+	int nb_reinit=0;
+	const String tabnames[35] = {
+"ADCO" , "OPTARIF" , "ISOUSC" , "BASE", "HCHC" , "HCHP",
+ "IMAX" , "IINST" , "PTEC", "PMAX", "PAPP", "HHPHC" , "MOTDETAT" , "PPOT",
+ "IINST1" , "IINST2" , "IINST3", "IMAX1" , "IMAX2" , "IMAX3" ,
+"EJPHN" , "EJPHPM" , "BBRHCJB" , "BBRHPJB", "BBRHCJW" , "BBRHPJW" , "BBRHCJR" ,
+"BBRHPJR" , "PEJP" , "DEMAIN" , "ADPS" , "ADIR1", "ADIR2" , "ADIR3"
+	};
+};
+extern webServer WEBSERVER;
 
 #endif

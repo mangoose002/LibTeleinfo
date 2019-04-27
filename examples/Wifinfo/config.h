@@ -18,12 +18,15 @@
 //
 // All text above must be included in any redistribution.
 //
+//Using library EEPROM version 1.0
+//
 // **********************************************************************************
 #ifndef __CONFIG_H__
 #define __CONFIG_H__
 
-// Include main project include file
-#include "Wifinfo.h"
+#include <Arduino.h>
+#include "wifinfo.h"
+
 
 #define CFG_SSID_SIZE 		32
 #define CFG_PSK_SIZE  		64
@@ -61,6 +64,7 @@
 #define CFG_LCD				  0x0001	// Enable display
 #define CFG_DEBUG			  0x0002	// Enable serial debug
 #define CFG_RGB_LED     0x0004  // Enable RGB LED
+
 #define CFG_BAD_CRC     0x8000  // Bad CRC when reading configuration
 
 // Web Interface Configuration Form field names
@@ -93,6 +97,7 @@
 #define CFG_FORM_HTTPREQ_PATH  FPSTR("httpreq_path")
 #define CFG_FORM_HTTPREQ_FREQ  FPSTR("httpreq_freq")
 #define CFG_FORM_HTTPREQ_SWIDX FPSTR("httpreq_swidx")
+
 
 #define CFG_FORM_IP  FPSTR("wifi_ip");
 #define CFG_FORM_GW  FPSTR("wifi_gw");
@@ -158,21 +163,22 @@ typedef struct
   _httpRequest httpReq;            // HTTP request
   uint16_t crc;
 } _Config;
-
-
-// Exported variables/object instancied in main sketch
-// ===================================================
-extern _Config      config;
-extern char         buff[];
-
 #pragma pack(pop)
- 
-// Declared exported function from route.cpp
-// ===================================================
-bool readConfig(bool clear_on_error=true);
-bool saveConfig(void);
-void showConfig(void);
 
+class configuration
+{
+public:
+	bool saveConfig(void);
+	void initConfig(void);
+	void showConfig(void);
+	void ResetConfig(void);
+	_Config      config;
+private:
+	bool readConfig(bool clear_on_error = true);
+	uint16_t crc16Update(uint16_t crc, uint8_t a);
+	void eepromDump(uint8_t bytesPerRow);
+};
+extern configuration CONFIGURATION;
 
 #endif 
 
