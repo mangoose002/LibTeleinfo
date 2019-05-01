@@ -18,8 +18,8 @@
 //
 // All text above must be included in any redistribution.
 //
-// Modifié par marc Prieur 2019
-//		-intégré le code dans la classe webClient webClient.cpp  webClient.h
+// Modifiï¿½ par marc Prieur 2019
+//		-intï¿½grï¿½ le code dans la classe webClient webClient.cpp  webClient.h
 //
 // Using library ESP8266HTTPClient version 1.1
 //
@@ -47,15 +47,16 @@ public:
 private:
 	boolean httpPost(char * host, uint16_t port, char * url);
 	//List of authorized value names in Teleinfo, to detect polluted entries
-		const String tabnames[35] = {
-	  "ADCO" , "OPTARIF" , "ISOUSC" , "BASE", "HCHC" , "HCHP",
-	   "IMAX" , "IINST" , "PTEC", "PMAX", "PAPP", "HHPHC" , "MOTDETAT" , "PPOT",
-	   "IINST1" , "IINST2" , "IINST3", "IMAX1" , "IMAX2" , "IMAX3" ,
-	  "EJPHN" , "EJPHPM" , "BBRHCJB" , "BBRHPJB", "BBRHCJW" , "BBRHPJW" , "BBRHCJR" ,
-	  "BBRHPJR" , "PEJP" , "DEMAIN" , "ADPS" , "ADIR1", "ADIR2" , "ADIR3"
+		const String tabnames[50] = {
+"ADCO" , "OPTARIF" , "ISOUSC" , "BASE", "HCHC" , "HCHP",
+ "IMAX" , "IINST" , "PTEC", "PMAX", "PAPP", "HHPHC" , "MOTDETAT" , "PPOT",
+ "IINST1" , "IINST2" , "IINST3", "IMAX1" , "IMAX2" , "IMAX3" ,
+"EJPHN" , "EJPHPM" , "BBRHCJB" , "BBRHPJB", "BBRHCJW" , "BBRHPJW" , "BBRHCJR" ,
+"BBRHPJR" , "PEJP" , "DEMAIN" , "ADPS" , "ADIR1", "ADIR2" , "ADIR3",
+//FOR STANDARD TYPE
+"ADSC","EAST","PREF","PCOUP","SINSTS","NTARF","NJOURF"
 	};
-
-
 };
+
 extern webClient WEBCLIENT;
 #endif

@@ -437,7 +437,8 @@ uint8_t TInfo::valuesDump(void)
 		  // Flags management
 		  if ( me->flags) {
 		    TI_Debug(F("Flags:0x")); 
-		    TI_Debugf("%02X =>", me->flags); 
+		    //TI_Debugf("%02X =>", me->flags); 
+       TI_Debug(me->flags);
 		    if ( me->flags & TINFO_FLAGS_EXIST)
 		      TI_Debug(F("Exist ")) ;
 		    if ( me->flags & TINFO_FLAGS_UPDATED)
@@ -504,11 +505,10 @@ Comments: return '\0' in case of error
 ====================================================================== */
 unsigned char TInfo::calcChecksum(char *etiquette, char *valeur)
 {
-	uint8_t sum = ' ';
+	uint16_t sum = ' ';
 	//5.3.6. Couche liaison document enedis Enedis-NOI-CPT_54E.pdf  
-	if (!this->modeLinkyHistorique)
-	{
-		sum += 0x09;// Somme des codes ASCII du message + un espace
+	if (!this->modeLinkyHistorique){
+		sum = 0x09 * 2;// Somme des codes ASCII du message + deux tabulations
 	}
   // avoid dead loop, always check all is fine 
   if (etiquette && valeur) {
@@ -519,6 +519,7 @@ unsigned char TInfo::calcChecksum(char *etiquette, char *valeur)
   
       while(*valeur)
         sum += *valeur++ ;
+
 	if (this->modeLinkyHistorique)
 	  return ((sum & 63) + ' ');
 	else
@@ -633,6 +634,7 @@ ValueList * TInfo::checkLine(char * pline)
         // Always check to avoid bad behavior 
         if(strlen(ptok) && strlen(pvalue)) {
           // Is checksum is OK
+          
          if ( calcChecksum(ptok,pvalue) == checksum) {
             // In case we need to do things on specific labels
             customLabel(ptok, pvalue, &flags);
@@ -707,9 +709,9 @@ void TInfo::process(char c)
 		{
           _fn_new_frame(me);
  }
-        #ifdef TI_Debug
-          valuesDump();
-        #endif
+       #ifdef TI_DEBUG
+          //valuesDump();
+       #endif
 
         // It's important there since all user job is done
         // to remove the alert flags from table (ADPS for example)

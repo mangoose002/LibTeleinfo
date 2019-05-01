@@ -42,7 +42,7 @@ extern "C" {
 //  soit sur Serial, soit sur Serial1 si compteur EDF raccordé sur Serial
 // Attention : si SIMU n'est pas déclaré, le debug est envoyé sur Serial1
 //  donc n'est pas visible au travers du port USB pour Arduino IDE !
-//#define DEBUG
+#define DEBUG
 
 // Décommenter SYSLOG pour une version capable d'envoyer du Debug
 //  vers un serveur rsyslog du réseau
@@ -56,11 +56,11 @@ extern "C" {
 
 /*  ===========================defines=================================== */
 #define TELEINFO_RXD2			//teleinfo sur RXD2 sinon sur RXD0
-#define DEBUGSERIAL				//DEBUGSERIAL debug vers TXD0
-#define SIMUTRAMETEMPO		//Version standard:simulation des trames tempo. strapper D4(TXD1) et D7(RXD2) ou D9(RXD0) suivant TELEINFO_RXD2
+//#define DEBUGSERIAL				//DEBUGSERIAL debug vers TXD0
+//#define SIMUTRAMETEMPO		//Version standard:simulation des trames tempo. strapper D4(TXD1) et D7(RXD2) ou D9(RXD0) suivant TELEINFO_RXD2
 #define AVEC_NTP				//Serveur de temps
 #define NO_IPSTATIC				//Essayer adresse hors plage DHCP(voir box) ---->OK mais plus de liaison avec l'extérieur(NTP...)il faudrait du  routage au niveau de la box!
-#define MODE_HISTORIQUE			//Pour le linky sinon mode standard (mode standard incomplet)
+//#define MODE_HISTORIQUE			//Pour le linky sinon mode standard (mode standard incomplet)
 
 #ifdef DEBUGSERIAL
 	#define MACRO

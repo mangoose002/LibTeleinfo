@@ -324,8 +324,12 @@ void setup() {
     DebuglnF("Fin des traces consoles voir avec syslog,la teleinfo est recue sur RXD2");
 	DebuglnF("Changement de vitesse des traces consoles voir avec syslog,la teleinfo est maintenant recu sur RXD0 a la place de l'USB(OU RXD2 si Serial.swap())");
   #else
+  #ifdef MODE_HISTORIQUE
     DebuglnF("Les traces consoles continue de fonctionner sur TXD0 à 1200 bauds ou VITESSE_SIMUTRAMETEMPO si SIMUTRAMETEMPO");
-	DebuglnF("La teleinfo est recue sur RXD0");
+  #else
+    DebuglnF("Les traces consoles continue de fonctionner sur TXD0 à 9600 bauds ou VITESSE_SIMUTRAMETEMPO si SIMUTRAMETEMPO");
+  #endif
+	  DebuglnF("La teleinfo est recue sur RXD0");
   #endif
 	#ifdef MODE_HISTORIQUE
 		#ifdef SIMUTRAMETEMPO
@@ -347,9 +351,9 @@ void setup() {
 		Serial.begin(9600, SERIAL_7E1);       //5.3.5. Couche physique document enedis Enedis-NOI-CPT_54E.pdf 
 	#endif
 #ifdef TELEINFO_RXD2
-	Serial.swap();  // reception teleinfo sur rxd2 sinon passe la reception teleinfo sur rx0 pour recuperer rx2 pour mosi
-						//fonctionne correctement sur rx0, il faut juste penser à enlever le strap de la simulation si present
-						//pour programmer ou debuguer via la console, pas de pb en OTA.
+	Serial.swap();  //reception teleinfo sur rxd2 sinon passe la reception teleinfo sur rx0 pour recuperer rx2 pour mosi
+					//fonctionne correctement sur rx0, il faut juste penser à enlever le strap de la simulation si present
+					//pour programmer ou debuguer via la console, pas de pb en OTA.
 #endif
 
 	#ifdef SIMUTRAMETEMPO
@@ -429,8 +433,8 @@ static unsigned long dureeMax = 0;
 #ifdef SIMUTRAMETEMPO
   SIMU_TEMPO.traite1Trame(NTP.getSeconds1970());
 #endif
-DebugF("dureeMax:");
-  Debugln((long)dureeMax);
+	//DebugF("dureeMax:");
+  	//Debugln((long)dureeMax);
   dureeMax = 0;
 
   }

@@ -992,7 +992,7 @@ void webServer::initOptVal(void)
 {
 
 	//********************************Options de compilation pour page html***************************************  
-	memset(optval, 0, 80);
+	memset(optval, 0, 100);
 
 #ifdef DEBUGSERIAL
 	strcat(optval, "DEBUGSERIAL, "); //13
@@ -1025,7 +1025,7 @@ void webServer::initOptVal(void)
 #ifdef MODE_HISTORIQUE
 	strcat(optval, "MODE_HISTO, ");	//12
 #else
-	strcat(optval, ", ");
+	strcat(optval, ", MODE_STANDARD");
 #endif
 	//********************************fin Options de compilation pour page html*************************************** 
 	Debugln(F("=============="));

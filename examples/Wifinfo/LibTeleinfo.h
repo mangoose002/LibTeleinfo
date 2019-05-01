@@ -54,6 +54,9 @@
 #include <ESP8266WiFi.h>
 #endif
 
+#include "mySyslog.h"
+#include "Wifinfo.h"
+
 // Define this if you want library to be verbose
 //#define TI_DEBUG
 
@@ -63,6 +66,11 @@
 
 
 #ifdef TI_DEBUG
+  #define TI_Debug(x)    Debug(x)
+  #define TI_Debugln(x)  Debugln(x)
+  #define TI_Debugf(...) DebugF(__VA_ARGS__)
+  #define TI_Debugflush 
+/*
   #if ESP8266
     #define TI_Debug(x)    Serial1.print(x)
     #define TI_Debugln(x)  Serial1.println(x)
@@ -74,6 +82,7 @@
     #define TI_Debugf(...) Serial.printf(__VA_ARGS__)
     #define TI_Debugflush  Serial.flush
   #endif
+*/
 #else
   #define TI_Debug(x)    
   #define TI_Debugln(x)  

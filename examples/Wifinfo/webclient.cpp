@@ -311,7 +311,7 @@ boolean webClient::httpRequest(void)
       boolean skip_item;
 
       url = *CONFIGURATION.config.httpReq.path ? CONFIGURATION.config.httpReq.path : "/";
-      url += "?";
+      //url += "?";
 
       // Loop thru the node
       while (me->next) {
@@ -327,6 +327,21 @@ boolean webClient::httpRequest(void)
         if (!skip_item)
         {
           String valName = String(me->name);
+          /* FOR STANDARD TYPE */
+          if (valName == "SINSTS"){
+            url.replace("%SINSTS%",String(atol(me->value)));
+          }
+          if (valName == "EAST"){
+            url.replace("%EAST%", String(atol(me->value)));
+          }
+          if (valName == "EASF01"){
+            url.replace("%EASF01%", String(atol(me->value)));
+          }
+          if (valName == "EASF02"){
+            url.replace("%EASF02%", String(atol(me->value)));
+          }
+
+          /* FOR HISTORIC TYPE */
           if (valName == "HCHP")
           {
             url.replace("%HCHP%", me->value);
@@ -427,8 +442,7 @@ Comments: -
 ====================================================================== */
 bool webClient::validate_value_name(String name)
 {
-
-	for (int i = 0; i < 35; i++) {
+	for (int i = 0; i < 50; i++) {
 		if ((tabnames[i].length() == name.length()) && (tabnames[i] == name)) {
 			return true;
 		}
