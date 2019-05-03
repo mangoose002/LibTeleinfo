@@ -439,22 +439,5 @@ boolean UPD_switch(void)
 	return ret;
 }
 #endif
-/* ======================================================================
-Function: validate_value_name
-Purpose : check if value name is in known range of values....
-Input   : name to check
-Output  : true if OK, false otherwise
-Comments: -
-====================================================================== */
-bool webClient::validate_value_name(String name)
-{
-	for (int i = 0; i < WC_TABNAME_SIZE; i++) {
-		if ((tabnames[i].length() == name.length()) && (tabnames[i] == name)) {
-			return true;
-		}
-	}
-	return false; //Not an existing name !
-}
-
 
 

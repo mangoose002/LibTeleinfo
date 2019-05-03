@@ -209,7 +209,13 @@ ValueList * TInfo::valueAdd(char * name, char * value, uint8_t checksum, uint8_t
   	uint8_t thischeck = calcChecksum(name,value);
 	int firstfree = -1;
 	ValueList * me = &ValuesTab[0];
-  
+  	
+  	if(!validateTag(name)){ //Not a valid tag
+  		TI_Debug(name);
+  		TI_Debugln(" is not a valid tag");
+  		return NULL;
+  	} 
+
   // just some paranoia 
 	if (thischeck != checksum ) {  
 		TI_Debug(name);
@@ -783,3 +789,13 @@ bool TInfo::getReinit() const		//marc
 }
 
 
+//Validate that the tag is valid
+bool TInfo::validateTag(String name)
+{
+	for (int i = 0; i < TINFO_VALIDTAG_SIZE; i++) {
+		if ((validTAG[i].length() == name.length()) && (validTAG[i] == name)) {
+			return true;
+		}
+	}
+	return false; //Not an valid name !
+}

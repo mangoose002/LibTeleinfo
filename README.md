@@ -130,4 +130,10 @@ Cependant, j’ai ajouté(entre parenthèse les options de compilation):
 -Je n'ai pas retesté:
 	-Les sorties leds(leds.cpp et leds.h),j'ai conservé les fonctions d'origine mais j'ai une autre version avec des leds APA106.
 	-Les sortie emoncms,jeedom et httpRequest, fonctions qui sont d'origine à la mise en place des classes près.
-	
+
+
+# Modifications par Mangoose branche 'rewrite-Wifinfo' :
+Modification de la structure _ValueList pour la prise en compte du mode standard
+Ajout de la fonction validateTag pour n'accepter que les TAG validés dans la RFC
+Simplification de la classe webclient
+Modification de la classe webserver (en s'appuyant sur les checks de TInfo)

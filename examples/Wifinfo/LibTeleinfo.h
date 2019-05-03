@@ -66,23 +66,24 @@
 
 
 #ifdef TI_DEBUG
-  #define TI_Debug(x)    Debug(x)
-  #define TI_Debugln(x)  Debugln(x)
-  #define TI_Debugf(...) DebugF(__VA_ARGS__)
-  #define TI_Debugflush 
-/*
-  #if ESP8266
-    #define TI_Debug(x)    Serial1.print(x)
-    #define TI_Debugln(x)  Serial1.println(x)
-    #define TI_Debugf(...) Serial1.printf(__VA_ARGS__)
-    #define TI_Debugflush  Serial1.flush
-  #else
-    #define TI_Debug(x)    Serial.print(x)
-    #define TI_Debugln(x)  Serial.println(x)
-    #define TI_Debugf(...) Serial.printf(__VA_ARGS__)
-    #define TI_Debugflush  Serial.flush
-  #endif
-*/
+	#ifdef SYSLOG
+  		#define TI_Debug(x)    		Debug(x)
+  		#define TI_Debugln(x)  		Debugln(x)
+  		#define TI_Debugf(...) 		DebugF(__VA_ARGS__)
+  		#define TI_Debugflush 
+	#else
+  		#if ESP8266
+    		#define TI_Debug(x)    	Serial1.print(x)
+    		#define TI_Debugln(x)  	Serial1.println(x)
+    		#define TI_Debugf(...) 	Serial1.printf(__VA_ARGS__)
+    		#define TI_Debugflush  	Serial1.flush
+  		#else
+    		#define TI_Debug(x)    	Serial.print(x)
+    		#define TI_Debugln(x)  	Serial.println(x)
+    		#define TI_Debugf(...) 	Serial.printf(__VA_ARGS__)
+    		#define TI_Debugflush  	Serial.flush
+  		#endif
+	#endif
 #else
   #define TI_Debug(x)    
   #define TI_Debugln(x)  
@@ -123,6 +124,7 @@ enum _State_e {
 
 //Added by P. Lena for Standard Type
 #define TINFO_TABSIZE       80
+#define TINFO_VALIDTAG_SIZE	105
 
 // what we done with received value (also for callback flags)
 #define TINFO_FLAGS_NONE     0x00
@@ -133,8 +135,8 @@ enum _State_e {
 #define TINFO_FLAGS_ALERT    0x80 /* This will generate an alert */
 
 // Local buffer for one line of teleinfo 
-// maximum size, I think it should be enought
-#define TINFO_BUFSIZE  64
+// maximum size, I think it should be enough
+#define TINFO_BUFSIZE  128  //Resized to 128 because of Standard mode
 
 // Teleinfo start and end of frame characters
 #define TINFO_STX 0x02
@@ -145,44 +147,59 @@ enum _State_e {
 class TInfo
 {
 public:
-  TInfo();
-  void          init(boolean modeLinkyHistorique);
-  void		      process (char c);
-  void          attachADPS(void (*_fn_ADPS)(uint8_t phase));  
-  void          attachData(void (*_fn_data)(ValueList * valueslist, uint8_t state));  
-  void          attachNewFrame(void (*_fn_new_frame)(ValueList * valueslist));  
-  void          attachUpdatedFrame(void (*_fn_updated_frame)(ValueList * valueslist));  
-  ValueList *   addCustomValue(char * name, char * value, uint8_t * flags);
-  ValueList *   getList(void);
-  uint8_t       valuesDump(void); 
+  	TInfo();
+  	void          init(boolean modeLinkyHistorique);
+  	void		  process (char c);
+  	void          attachADPS(void (*_fn_ADPS)(uint8_t phase));  
+  	void          attachData(void (*_fn_data)(ValueList * valueslist, uint8_t state));  
+  	void          attachNewFrame(void (*_fn_new_frame)(ValueList * valueslist));  
+  	void          attachUpdatedFrame(void (*_fn_updated_frame)(ValueList * valueslist));  
+  	ValueList *   addCustomValue(char * name, char * value, uint8_t * flags);
+  	ValueList *   getList(void);
+  	uint8_t       valuesDump(void); 
     //char *        valueGet(char * name, char * value);
 	char *        valueGet(const char * name, char * value);		//marc
-  boolean       listDelete();
-  unsigned char calcChecksum(char *etiquette, char *valeur) ;
+  	boolean       listDelete();
+  	unsigned char calcChecksum(char *etiquette, char *valeur) ;
 	void          setReinit();			//marc
 	bool          getReinit() const;			//marc
 	boolean       modeLinkyHistorique;
 private:
-  void          clearBuffer();
-  ValueList *   valueAdd (char * name, char * value, uint8_t checksum, uint8_t * flags);
-  boolean       valueRemove (char * name);
-  boolean       valueRemoveFlagged(uint8_t flags);
-  int           labelCount();
-  void          customLabel( char * plabel, char * pvalue, uint8_t * pflags) ;
-  ValueList *   checkLine(char * pline) ;
+  	void          clearBuffer();
+  	ValueList *   valueAdd (char * name, char * value, uint8_t checksum, uint8_t * flags);
+  	boolean       valueRemove (char * name);
+  	boolean       valueRemoveFlagged(uint8_t flags);
+  	int           labelCount();
+  	void          customLabel( char * plabel, char * pvalue, uint8_t * pflags) ;
+  	ValueList *   checkLine(char * pline) ;
 
-  _State_e  _state; // Teleinfo machine state
-  ValueList _valueslist;   // Linked list of teleinfo values
-  char      _recv_buff[TINFO_BUFSIZE]; // line receive buffer
-  uint8_t   _recv_idx;  // index in receive buffer
-  boolean   _frame_updated; // Data on the frame has been updated
-  void      (*_fn_ADPS)(uint8_t phase);
-  void      (*_fn_data)(ValueList * valueslist, uint8_t state);
-  void      (*_fn_new_frame)(ValueList * valueslist);
-  void      (*_fn_updated_frame)(ValueList * valueslist);
+  	_State_e  _state; // Teleinfo machine state
+  	ValueList _valueslist;   // Linked list of teleinfo values
+  	char      _recv_buff[TINFO_BUFSIZE]; // line receive buffer
+  	uint8_t   _recv_idx;  // index in receive buffer
+  	boolean   _frame_updated; // Data on the frame has been updated
+  	void      (*_fn_ADPS)(uint8_t phase);
+  	void      (*_fn_data)(ValueList * valueslist, uint8_t state);
+  	void      (*_fn_new_frame)(ValueList * valueslist);
+  	void      (*_fn_updated_frame)(ValueList * valueslist);
 	bool	    need_reinit = false;    //marc
-  //volatile uint8_t *dcport;
-  //uint8_t dcpinmask;
+  	//volatile uint8_t *dcport;
+  	//uint8_t dcpinmask;
+	const String validTAG[TINFO_VALIDTAG_SIZE] = {
+		"ADCO" , "OPTARIF" , "ISOUSC" , "BASE", "HCHC" , "HCHP",
+ 		"IMAX" , "IINST" , "PTEC", "PMAX", "PAPP", "HHPHC" , "MOTDETAT" , "PPOT",
+ 		"IINST1" , "IINST2" , "IINST3", "IMAX1" , "IMAX2" , "IMAX3" ,
+		"EJPHN" , "EJPHPM" , "BBRHCJB" , "BBRHPJB", "BBRHCJW" , "BBRHPJW" , "BBRHCJR" ,
+		"BBRHPJR" , "PEJP" , "DEMAIN" , "ADPS" , "ADIR1", "ADIR2" , "ADIR3",
+		//FOR STANDARD TYPE
+		"ADSC", "VTIC", "DATE", "NGTF", "LTARF", "EAST","EASF01","EASF02","EASF03","EASF04","EASF05",
+		"EASF06", "EASF07", "EASF08", "EASF09", "EASF10", "EASD01", "EASD02", "EASD03", "EASD04", "EAIT",
+		"ERQ1", "ERQ2", "ERQ3", "ERQ4", "IRMS1", "IRMS2", "IRMS3", "URMS1", "URMS2", "URMS3",
+		"PREF","PCOUP", "SINSTS","SINSTS1","SINSTS2","SINSTS3","SMAXSN","SMAXSN1","SMAXSN2","SMAXSN3",
+		"SMAXSN-1","SMAXSN1-1","SMAXSN2-1","SMAXSN3-1","SINSTI","SMAXIN","SMAXIN-1","CCASN","CCASN-1",
+		"CCAIN","CCAIN-1","UMOY1","UMOY2","UMOY3","STGE","DPM1","FPM1","DPM2","FPM2","DPM3","FPM3",
+		"MSG1","MSG2","PRM","RELAIS","NTARF","NJOURF","NJOURF+1","PJOURF+1","PPOINTE"
+	};
 };
 
 extern TInfo TINFO;		//marc

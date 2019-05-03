@@ -201,17 +201,11 @@ webServer::webServer()
 					if (first_item)
 						first_item = false;
 
-					if (WEBCLIENT.validate_value_name(me->name)) {
-						//It's a known name : process the entry
-						response += F(",\"");
-						response += me->name;
-						response += F("\":");
-						formatNumberJSON(response, me->value);
-					}
-					else {
-						Debugln("setReinit sendJSON");
-						TINFO.setReinit();
-					} // name validity
+					
+					response += F(",\"");
+					response += me->name;
+					response += F("\":");
+					formatNumberJSON(response, me->value);
 				} //free entry
 			} //while
 		   // Json end
@@ -284,26 +278,18 @@ webServer::webServer()
 						first_item = false;
 					else
 						response += F(",\r\n");
-					if (WEBCLIENT.validate_value_name(me->name)) {
-						//It's a known name : process the entry  
-						response += F("{\"na\":\"");
-						response += me->name;
-						response += F("\", \"va\":\"");
-						response += me->value;
-						response += F("\", \"ck\":\"");
-						if (me->checksum == '"' || me->checksum == '\\' || me->checksum == '/')
-							response += '\\';
-						response += (char)me->checksum;
-						response += F("\", \"fl\":");
-						response += me->flags;
-						response += '}';
-					}
-					else {
-						//Don't put this line in table : name is corrupted !
-						Debugln("setReinit tinfoJSONTable");
-            Debugln(me->name);
-						TINFO.setReinit();
-					}
+					
+					response += F("{\"na\":\"");
+					response += me->name;
+					response += F("\", \"va\":\"");
+					response += me->value;
+					response += F("\", \"ck\":\"");
+					if (me->checksum == '"' || me->checksum == '\\' || me->checksum == '/')
+						response += '\\';
+					response += (char)me->checksum;
+					response += F("\", \"fl\":");
+					response += me->flags;
+					response += '}';
 				}
 			}
 			// Json end
