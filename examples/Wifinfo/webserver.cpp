@@ -18,8 +18,8 @@
 //
 // All text above must be included in any redistribution.
 //
-// Modifié par marc Prieur 2019
-//		-intégré le code dans la classe webClient webServer.cpp  webServer.h
+// Modifiï¿½ par marc Prieur 2019
+//		-intï¿½grï¿½ le code dans la classe webClient webServer.cpp  webServer.h
 //
 // Using library ESP8266WebServer version 1.0
 //
@@ -227,6 +227,8 @@ webServer::webServer()
 	this->on("/tinfo.json", [&]() {
 		// we're there
 		ESP.wdtFeed();  //Force software wadchog to restart from 0
+  //  this->send(200, "text/json", "{}");
+  //  return;
 
 		ValueList * me = TINFO.getList();
 		String response = "";
@@ -299,6 +301,7 @@ webServer::webServer()
 					else {
 						//Don't put this line in table : name is corrupted !
 						Debugln("setReinit tinfoJSONTable");
+            Debugln(me->name);
 						TINFO.setReinit();
 					}
 				}
@@ -792,7 +795,7 @@ void webServer::getSysJSONData(String & response)
 	if (SwitchState)
 		response += F("Open");  //switch ouvert
 	else
-		response += F("Closed");  //switch fermé
+		response += F("Closed");  //switch fermï¿½
 
 	response += "\"},\r\n";
 #endif
@@ -857,7 +860,7 @@ void webServer::getSysJSONData(String & response)
 
 	response += "{\"na\":\"Analog\",\"va\":\"";
 	//adc = ((1000 * analogRead(A0)) / 1024);
-	//adc = ESP.getVcc();  //pas juste du au pont 220/100k  d'après internet......
+	//adc = ESP.getVcc();  //pas juste du au pont 220/100k  d'aprï¿½s internet......
 	sprintf_P(buffer, PSTR("%d mV"), (1000 * analogRead(A0) / 1024));
 	response += buffer;
 	response += "\"},\r\n";

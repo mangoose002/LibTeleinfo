@@ -37,9 +37,9 @@
 
 #include "LibTeleinfo.h" 
 
-int ValueItem = 0;					//Index of next position to use
-struct _ValueList ValuesTab[50];	//Allocate static table of 50 items
-									// to don't use anymore malloc & free
+int ValueItem = 0;							//Index of next position to use
+struct _ValueList ValuesTab[TINFO_TABSIZE];	//Allocate static table of TINFO_TABSIZE items
+											// to don't use anymore malloc & free
 
 
 /* ======================================================================
@@ -52,15 +52,15 @@ Comments: -
 TInfo::TInfo()
 {
 	ValueList * me;
-	for(int i = 0; i < 50; i++) {
+	for(int i = 0; i < TINFO_TABSIZE; i++) {
 		me = &ValuesTab[i];
 		memset(&ValuesTab[i], 0, sizeof(_ValueList) );	//Also reset the 'free' marker
 		me->free=1;		//Init each entry as free
 		me->flags = TINFO_FLAGS_NONE;
-		if(i < 49)
+		if(i < TINFO_TABSIZE-1)
 			me->next = &ValuesTab[i+1];
 	}
-
+	(&ValuesTab[TINFO_TABSIZE-1])->next = NULL; //Should be OK but just in case.
 
   // callback
   _fn_ADPS = NULL;
@@ -204,9 +204,9 @@ Comments: - state of the label changed by the function
 ValueList * TInfo::valueAdd(char * name, char * value, uint8_t checksum, uint8_t * flags)
 {
   
-  uint8_t lgname = strlen(name);
-  uint8_t lgvalue = strlen(value);
-  uint8_t thischeck = calcChecksum(name,value);
+  	uint8_t lgname = strlen(name);
+  	uint8_t lgvalue = strlen(value);
+  	uint8_t thischeck = calcChecksum(name,value);
 	int firstfree = -1;
 	ValueList * me = &ValuesTab[0];
   
@@ -226,7 +226,7 @@ ValueList * TInfo::valueAdd(char * name, char * value, uint8_t checksum, uint8_t
 		// Parameters seems to be coherent
 		// Scan the existing table
 		int i;
-		for(i=0; i < ValueItem || i < 50 ; i++) {     //marc change , by ||
+		for(i=0; i < ValueItem || i < TINFO_TABSIZE ; i++) {     //marc change , by ||
 			me = &ValuesTab[i];
 			if( ! me->free) {
 				if (strncmp(me->name, name, lgname) == 0) {
@@ -260,7 +260,7 @@ ValueList * TInfo::valueAdd(char * name, char * value, uint8_t checksum, uint8_t
 			//Use the 1st free entry found
 			i=firstfree;
 		} else {
-			if(i < 50)
+			if(i < TINFO_TABSIZE)
 				ValueItem=i;	//Note new entry as last one
 			else
 				return ( (ValueList *) NULL ); //Table saturated !
@@ -270,7 +270,7 @@ ValueList * TInfo::valueAdd(char * name, char * value, uint8_t checksum, uint8_t
 	  me = &ValuesTab[i];
       memset(me, 0, sizeof(_ValueList) );	//Also reset the 'free' marker
       me->checksum = checksum;
-	  if(i < 49)
+	  if(i <TINFO_TABSIZE -1)
 			me->next = &ValuesTab[i+1];
 
 	  // Copy the string data (name & value)
@@ -301,7 +301,7 @@ boolean TInfo::valueRemoveFlagged(uint8_t flags)
 	int i;
 	ValueList * me;
 
-	for (i = 0; i < ValueItem || i < 50; i++) {
+	for (i = 0; i < ValueItem || i < TINFO_TABSIZE; i++) {
 		me = &ValuesTab[i];
 		if (!me->free) {
 			if (me->flags & flags) {
@@ -328,7 +328,7 @@ boolean TInfo::valueRemove(char * name)
   int i;
 	ValueList * me;
 
-	for(i=0 ; i < ValueItem || i < 50; i++) {    //marc change , by ||
+	for(i=0 ; i < ValueItem || i < TINFO_TABSIZE; i++) {    //marc change , by ||
 	  me = &ValuesTab[i];
 	  if( ! me->free ) {
 		//This entry is busy
@@ -363,7 +363,7 @@ char * TInfo::valueGet(const char * name, char * value)
   // Got one and all seems good ?
   if (lgname) {
     // Loop thru the table
-    for(i = 0; i < ValueItem || i < 50; i++) {    //marc change , by ||
+    for(i = 0; i < ValueItem || i < TINFO_TABSIZE; i++) {    //marc change , by ||
 		me = &ValuesTab[i];
 		if( ! me->free) {
       		// Check if we match this LABEL
@@ -391,7 +391,7 @@ Output  : Pointer
 ====================================================================== */
 ValueList * TInfo::getList(void)
 {
-	ValueList * me = &ValuesTab[0];
+  ValueList * me = &ValuesTab[0];
   // Get our linked list 
   return me;
 }
@@ -411,7 +411,7 @@ uint8_t TInfo::valuesDump(void)
   // Got one ?
   if (me) {
     // Loop thru the node
-	for(int i=0; i<50; i++) {
+	for(int i=0; i<TINFO_TABSIZE; i++) {
       me = &ValuesTab[i];
       if( ! me->free ) {
 		  index++;
@@ -464,7 +464,7 @@ int TInfo::labelCount()
 {
   int count = 0;
 	ValueList * me;
-  for(int i=0 ; i < 50 ; i++) {
+  for(int i=0 ; i < TINFO_TABSIZE ; i++) {
 	me = &ValuesTab[i];
 	if( ! me->free)
 		count++;
@@ -483,14 +483,15 @@ boolean TInfo::listDelete()
 
 	ValueList * me;
 
-	for(int i = 0; i < 50; i++) {
+	for(int i = 0; i < TINFO_TABSIZE; i++) {
 		me = &ValuesTab[i];
 		memset(&ValuesTab[i], 0, sizeof(_ValueList) );	//Also reset the 'free' marker
 		me->free=1;		//Init each entry as free
 		me->flags = TINFO_FLAGS_NONE;
-		if(i < 49)
+		if(i < TINFO_TABSIZE)
 			me->next = &ValuesTab[i+1];
 	}
+	(&ValuesTab[TINFO_TABSIZE-1])->next = NULL; //Should be OK but just in case.
 
 	return(true);
 }

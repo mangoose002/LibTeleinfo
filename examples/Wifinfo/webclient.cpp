@@ -50,10 +50,12 @@ boolean webClient::httpPost(char * host, uint16_t port, char * url)
   unsigned long start = millis();
 
   // configure traged server and url
-  http.begin(host, port, url); 
+  http.begin(host, port, url);
+  http.setTimeout(1500);
+  
   //http.begin("http://emoncms.org/input/post.json?node=20&apikey=2f13e4608d411d20354485f72747de7b&json={PAPP:100}");
   //http.begin("emoncms.org", 80, "/input/post.json?node=20&apikey=2f13e4608d411d20354485f72747de7b&json={}"); //HTTP
-  char  buffer[132];
+  char  buffer[300];
   sprintf(buffer,"http%s://%s:%d%s => ", port==443?"s":"", host, port, url);
   Debug(buffer);
 
@@ -84,6 +86,7 @@ Comments: -
 ====================================================================== */
 String webClient::build_emoncms_json(void)
 {
+  ESP.wdtFeed();
   boolean first_item = true;
   
   String url = "{" ;
@@ -191,6 +194,7 @@ Comments: -
 ====================================================================== */
 boolean webClient::emoncmsPost(void)
 {
+  ESP.wdtFeed();
   boolean ret = false;
 
   // Some basic checking
@@ -234,6 +238,7 @@ Comments: -
 ====================================================================== */
 boolean webClient::jeedomPost(void)
 {
+  ESP.wdtFeed();
   boolean ret = false;
 
   // Some basic checking
@@ -298,6 +303,7 @@ Comments: -
 ====================================================================== */
 boolean webClient::httpRequest(void)
 {
+  ESP.wdtFeed();
   boolean ret = false;
 
   // Some basic checking
@@ -442,7 +448,7 @@ Comments: -
 ====================================================================== */
 bool webClient::validate_value_name(String name)
 {
-	for (int i = 0; i < 50; i++) {
+	for (int i = 0; i < WC_TABNAME_SIZE; i++) {
 		if ((tabnames[i].length() == name.length()) && (tabnames[i] == name)) {
 			return true;
 		}

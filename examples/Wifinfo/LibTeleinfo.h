@@ -105,7 +105,8 @@ struct _ValueList
 {
   ValueList *next;  // next element (for compatibility)
   char name[16];    // LABEL of value name
-  char value[16];   // value 
+  //char value[16];   // value 
+  char value[98];   //Changed for standard type
   uint8_t checksum; // checksum
   uint8_t flags;    // specific flags
   uint8_t free;		// checksum
@@ -119,6 +120,9 @@ enum _State_e {
   TINFO_WAIT_ETX, // We had STX, We're waiting for ETX
   TINFO_READY     // We had STX AND ETX, So we're OK
 };
+
+//Added by P. Lena for Standard Type
+#define TINFO_TABSIZE       80
 
 // what we done with received value (also for callback flags)
 #define TINFO_FLAGS_NONE     0x00
@@ -140,45 +144,45 @@ enum _State_e {
 
 class TInfo
 {
-  public:
-    TInfo();
-    void          init(boolean modeLinkyHistorique);
-    void		  process (char c);
-    void          attachADPS(void (*_fn_ADPS)(uint8_t phase));  
-    void          attachData(void (*_fn_data)(ValueList * valueslist, uint8_t state));  
-    void          attachNewFrame(void (*_fn_new_frame)(ValueList * valueslist));  
-    void          attachUpdatedFrame(void (*_fn_updated_frame)(ValueList * valueslist));  
-    ValueList *   addCustomValue(char * name, char * value, uint8_t * flags);
-    ValueList *   getList(void);
-    uint8_t       valuesDump(void);
+public:
+  TInfo();
+  void          init(boolean modeLinkyHistorique);
+  void		      process (char c);
+  void          attachADPS(void (*_fn_ADPS)(uint8_t phase));  
+  void          attachData(void (*_fn_data)(ValueList * valueslist, uint8_t state));  
+  void          attachNewFrame(void (*_fn_new_frame)(ValueList * valueslist));  
+  void          attachUpdatedFrame(void (*_fn_updated_frame)(ValueList * valueslist));  
+  ValueList *   addCustomValue(char * name, char * value, uint8_t * flags);
+  ValueList *   getList(void);
+  uint8_t       valuesDump(void); 
     //char *        valueGet(char * name, char * value);
 	char *        valueGet(const char * name, char * value);		//marc
-    boolean       listDelete();
-    unsigned char calcChecksum(char *etiquette, char *valeur) ;
-	void setReinit();			//marc
-	bool getReinit() const;			//marc
-	boolean modeLinkyHistorique;
-  private:
-    void       clearBuffer();
-    ValueList *   valueAdd (char * name, char * value, uint8_t checksum, uint8_t * flags);
-    boolean       valueRemove (char * name);
-    boolean       valueRemoveFlagged(uint8_t flags);
-    int           labelCount();
-    void          customLabel( char * plabel, char * pvalue, uint8_t * pflags) ;
-    ValueList *   checkLine(char * pline) ;
+  boolean       listDelete();
+  unsigned char calcChecksum(char *etiquette, char *valeur) ;
+	void          setReinit();			//marc
+	bool          getReinit() const;			//marc
+	boolean       modeLinkyHistorique;
+private:
+  void          clearBuffer();
+  ValueList *   valueAdd (char * name, char * value, uint8_t checksum, uint8_t * flags);
+  boolean       valueRemove (char * name);
+  boolean       valueRemoveFlagged(uint8_t flags);
+  int           labelCount();
+  void          customLabel( char * plabel, char * pvalue, uint8_t * pflags) ;
+  ValueList *   checkLine(char * pline) ;
 
-    _State_e  _state; // Teleinfo machine state
-    ValueList _valueslist;   // Linked list of teleinfo values
-    char      _recv_buff[TINFO_BUFSIZE]; // line receive buffer
-    uint8_t   _recv_idx;  // index in receive buffer
-    boolean   _frame_updated; // Data on the frame has been updated
-    void      (*_fn_ADPS)(uint8_t phase);
-    void      (*_fn_data)(ValueList * valueslist, uint8_t state);
-    void      (*_fn_new_frame)(ValueList * valueslist);
-    void      (*_fn_updated_frame)(ValueList * valueslist);
-	bool	  need_reinit = false;    //marc
-    //volatile uint8_t *dcport;
-    //uint8_t dcpinmask;
+  _State_e  _state; // Teleinfo machine state
+  ValueList _valueslist;   // Linked list of teleinfo values
+  char      _recv_buff[TINFO_BUFSIZE]; // line receive buffer
+  uint8_t   _recv_idx;  // index in receive buffer
+  boolean   _frame_updated; // Data on the frame has been updated
+  void      (*_fn_ADPS)(uint8_t phase);
+  void      (*_fn_data)(ValueList * valueslist, uint8_t state);
+  void      (*_fn_new_frame)(ValueList * valueslist);
+  void      (*_fn_updated_frame)(ValueList * valueslist);
+	bool	    need_reinit = false;    //marc
+  //volatile uint8_t *dcport;
+  //uint8_t dcpinmask;
 };
 
 extern TInfo TINFO;		//marc
