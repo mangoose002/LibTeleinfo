@@ -240,7 +240,7 @@ ValueList * TInfo::valueAdd(char * name, char * value, uint8_t checksum, uint8_t
 						*flags |= TINFO_FLAGS_UPDATED;
 						me->flags = *flags ;
 						// Copy new value
-						memset(me->value, 0, 16);
+						memset(me->value, 0, 98);
 						memcpy(me->value, value , lgvalue );
 						me->checksum = checksum ;
 
