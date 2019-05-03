@@ -110,8 +110,6 @@ String webClient::build_emoncms_json(void)
             else
               url += ",";
               
-            
-            if(validate_value_name(me->name)) {
               url +=  me->name ;
               url += ":" ;
       
@@ -169,12 +167,6 @@ String webClient::build_emoncms_json(void)
               } else {
                 url += me->value;
               }
-            } else {
-              //Value name not valid : ignore this value, and
-              //  force Teleinfo to reinit on next loop !
-				Debugln("setReinit emoncms");
-				TINFO.setReinit();
-            }
          } //not free entry
       } // While next
 

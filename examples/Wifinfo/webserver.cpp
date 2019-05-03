@@ -221,9 +221,7 @@ webServer::webServer()
 	this->on("/tinfo.json", [&]() {
 		// we're there
 		ESP.wdtFeed();  //Force software wadchog to restart from 0
-  //  this->send(200, "text/json", "{}");
-  //  return;
-
+  
 		ValueList * me = TINFO.getList();
 		String response = "";
 

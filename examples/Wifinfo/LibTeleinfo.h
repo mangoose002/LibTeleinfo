@@ -163,6 +163,7 @@ public:
   	unsigned char calcChecksum(char *etiquette, char *valeur) ;
 	void          setReinit();			//marc
 	bool          getReinit() const;			//marc
+  bool          validateTag(String);
 	boolean       modeLinkyHistorique;
 private:
   	void          clearBuffer();
@@ -198,7 +199,7 @@ private:
 		"PREF","PCOUP", "SINSTS","SINSTS1","SINSTS2","SINSTS3","SMAXSN","SMAXSN1","SMAXSN2","SMAXSN3",
 		"SMAXSN-1","SMAXSN1-1","SMAXSN2-1","SMAXSN3-1","SINSTI","SMAXIN","SMAXIN-1","CCASN","CCASN-1",
 		"CCAIN","CCAIN-1","UMOY1","UMOY2","UMOY3","STGE","DPM1","FPM1","DPM2","FPM2","DPM3","FPM3",
-		"MSG1","MSG2","PRM","RELAIS","NTARF","NJOURF","NJOURF+1","PJOURF+1","PPOINTE"
+		"MSG1","MSG2","PRM","RELAIS","NTARF","NJOURF","NJOURF+1",/*"PJOURF+1",*/"PPOINTE"
 	};
 };
 

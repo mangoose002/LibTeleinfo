@@ -133,7 +133,8 @@ Cependant, j’ai ajouté(entre parenthèse les options de compilation):
 
 
 # Modifications par Mangoose branche 'rewrite-Wifinfo' :
-Modification de la structure _ValueList pour la prise en compte du mode standard
+Modification de la structure ValueList pour la prise en compte du mode standard
 Ajout de la fonction validateTag pour n'accepter que les TAG validés dans la RFC
 Simplification de la classe webclient
 Modification de la classe webserver (en s'appuyant sur les checks de TInfo)
+Correction du code de la page web pour prise en compte des 2 types d'informations
